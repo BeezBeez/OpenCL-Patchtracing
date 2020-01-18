@@ -47,14 +47,14 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
-    <IntDir>$(ProjectDir)Intermediate-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Intermediate-$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(ProjectDir)Libraries\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Binaries\</OutDir>
     <TargetName>$(ProjectName)-$(Configuration)</TargetName>
-    <IntDir>$(ProjectDir)Intermediate-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)Intermediate-$(Configuration)\$(ProjectName)\</IntDir>
     <LibraryPath>$(ProjectDir)Libraries\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
