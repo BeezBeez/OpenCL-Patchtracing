@@ -6,5 +6,6 @@
 #include "Renderer/CLProgram.h"
 
 #include "Programs/ParallelAdd.h"
+#include "Programs/SampleImage.h"
 
 using namespace PathTracer;

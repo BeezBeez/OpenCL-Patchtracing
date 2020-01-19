@@ -9,12 +9,14 @@ namespace PathTracer
 	public:
 		Context context;
 		CLRenderer* renderer;
+		CommandQueue queue;
 
 	public:
 		CLContext(CLRenderer* renderer)
 		{
 			this->renderer = renderer;
 			context = Context(renderer->RendererDevice);
+			queue = CommandQueue(context, renderer->RendererDevice);
 		}
 	};
 }

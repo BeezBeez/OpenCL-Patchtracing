@@ -26,13 +26,11 @@ namespace PathTracer::Programs
 			kernel.setArg(1, clBufferB);
 			kernel.setArg(2, clBufferOutput);
 
-			CommandQueue queue = CommandQueue(context->context, context->renderer->RendererDevice);
-
 			std::size_t globalWorkSize = numElements;
 			std::size_t localWorkSize = 10;
 
-			queue.enqueueNDRangeKernel(kernel, NULL, globalWorkSize, localWorkSize);
-			queue.enqueueReadBuffer(clBufferOutput, CL_TRUE, 0, numElements * sizeof(cl_float), result);
+			context->queue.enqueueNDRangeKernel(kernel, NULL, globalWorkSize, localWorkSize);
+			context->queue.enqueueReadBuffer(clBufferOutput, CL_TRUE, 0, numElements * sizeof(cl_float), result);
 
 			return result;
 		}

@@ -33,4 +33,4 @@ using namespace cl;
 
 
 #define Delay(x) sleep_for(milliseconds(x))
-#define WaitForEnter() do {} while (getchar() != '\n')
+#define WaitForEnter() ConsoleOutput << "Press [ENTER] to continue..."; do {} while (getchar() != '\n')

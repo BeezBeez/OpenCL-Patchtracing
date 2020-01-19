@@ -63,6 +63,18 @@
     <ClInclude Include="Sources\Programs\ParallelAdd.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Programs\SampleImage.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Scenes\Scene.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Scenes\CornellBoxEcoPlus.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Programs\SceneImage.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Main.cpp">
@@ -71,5 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Kernels\ParallelAdd.cl" />
+    <None Include="Kernels\SampleImage.cl" />
+    <None Include="Kernels\SceneImage.cl" />
   </ItemGroup>
 </Project>

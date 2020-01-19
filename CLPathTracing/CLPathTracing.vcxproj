@@ -76,6 +76,7 @@
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /E /I /Y "$(ProjectDir)Kernels" "$(OutputPath)Kernels"</Command>
+      <Message>Copying OpenCL Kernels</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -101,6 +102,7 @@
     </Link>
     <PostBuildEvent>
       <Command>XCOPY /E /I /Y "$(ProjectDir)Kernels" "$(OutputPath)Kernels"</Command>
+      <Message>Copying OpenCL Kernels</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -119,15 +121,21 @@
     <ClInclude Include="Libraries\OpenCL\include\CL\opencl.h" />
     <ClInclude Include="Sources\Core\Application.h" />
     <ClInclude Include="Sources\Programs\ParallelAdd.h" />
+    <ClInclude Include="Sources\Programs\SampleImage.h" />
+    <ClInclude Include="Sources\Programs\SceneImage.h" />
     <ClInclude Include="Sources\Renderer\CLContext.h" />
     <ClInclude Include="Sources\Renderer\CLProgram.h" />
     <ClInclude Include="Sources\Renderer\CLRenderer.h" />
     <ClInclude Include="Sources\Core\Core.h" />
+    <ClInclude Include="Sources\Scenes\CornellBoxEcoPlus.h" />
+    <ClInclude Include="Sources\Scenes\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Kernels\ParallelAdd.cl">
-      <FileType>CppCode</FileType>
+      <FileType>Document</FileType>
     </None>
+    <None Include="Kernels\SampleImage.cl" />
+    <None Include="Kernels\SceneImage.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
