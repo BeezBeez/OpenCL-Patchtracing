@@ -49,5 +49,6 @@ namespace PathTracer::Scenes
 		}
 
 		Sphere* GetObjects() { return sphereObjects.data(); }
+		std::size_t GetSpheresCount() { return sphereObjects.size(); }
 	};
 }

@@ -12,6 +12,8 @@ namespace PathTracer
 		Kernel kernel;
 
 	private:
+		std::size_t globalWorkSize = 0;
+		std::size_t localWorkSize = 0;
 		string KernelCode;
 		string KernelName;
 
@@ -36,7 +38,11 @@ namespace PathTracer
 				The kernel forms the starting points into the OpenCL program, analogous to main() in CPU code.  */
 
 				kernel = Kernel(program, "main");
+
+				//Apply a default local work size
+				SetLocalWorkSize(kernel.getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(context->renderer->RendererDevice));
 				ConsoleOutput << "Kernel compilation completed succesfully !\n";
+				ConsoleOutput << "Kernel work group size : " << localWorkSize << endl;
 				return true;
 			}
 		}
@@ -78,6 +84,23 @@ namespace PathTracer
 				ConsoleOutput << "ERROR : Program creation failed using \"" << KernelName << "\" !";
 			}
 		}
+
+		void SetLocalWorkSize(std::size_t value)
+		{
+			localWorkSize = value;
+		}
+
+		void SetGlobalWorkSize(std::size_t value)
+		{
+			globalWorkSize = value;
+
+			if (globalWorkSize % localWorkSize != 0) { //Ensure the global work size is a multiple of local work size
+				SetGlobalWorkSize((globalWorkSize / localWorkSize + 1) * localWorkSize);
+			}
+		}
+
+		std::size_t GetLocalWorkSize() { return localWorkSize; }
+		std::size_t GetGlobalWorkSize() { return globalWorkSize; }
 
 		void PrintKernelCode()
 		{

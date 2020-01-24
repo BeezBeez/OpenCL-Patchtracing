@@ -7,9 +7,10 @@ namespace PathTracer::Programs
 	class SceneImage : public CLProgram
 	{
 	private:
-		unsigned int ImageWidth, ImageHeight;
+		unsigned int ImageWidth, ImageHeight, ImageSamples, RayBounceCount;
 		cl_float4* SampleOutput;
 		Scenes::Sphere* cpuSpheres;
+		std::size_t spheresCount;
 		string ImageName;
 
 	private:
@@ -35,19 +36,56 @@ namespace PathTracer::Programs
 			resultImage.close();
 		}
 	public:
-		SceneImage(CLContext* context, Scenes::Scene* scene, string ImageName, unsigned int width = 1280, unsigned int height = 720) : CLProgram(context, string("SceneImage"))
+		SceneImage(CLContext* context, Scenes::Scene* scene, string ImageName, unsigned int bounceCount = 2U, unsigned int samples = 32U, unsigned int width = 1280, unsigned int height = 720) : CLProgram(context, string("SceneImage"))
 		{
 			this->ImageWidth = width;
 			this->ImageHeight = height;
+			this->ImageSamples = samples;
+			this->RayBounceCount = bounceCount;
 			this->ImageName = ImageName;
+			this->SampleOutput = new cl_float3[width * height];
 
-			cpuSpheres = new Scenes::Sphere[];
+			spheresCount = scene->GetSpheresCount();
+			cpuSpheres = new Scenes::Sphere[spheresCount];
 			cpuSpheres = scene->GetObjects();
 		}
 
 		void Run()
 		{
+			ConsoleOutput << "Sending " << spheresCount << " spheres to GPU...\n";
+			Buffer clOutput = Buffer(context->context, CL_MEM_WRITE_ONLY, ImageWidth * ImageHeight * sizeof(cl_float3));
+			Buffer clSceneSpheres = Buffer(context->context, CL_MEM_READ_ONLY, spheresCount * sizeof(Scenes::Sphere));
+			context->queue.enqueueWriteBuffer(clSceneSpheres, CL_TRUE, 0, spheresCount * sizeof(Scenes::Sphere), cpuSpheres);
 
+			kernel.setArg(0, clSceneSpheres);
+			kernel.setArg(1, ImageWidth);
+			kernel.setArg(2, ImageHeight);
+			kernel.setArg(3, (int)spheresCount);
+			kernel.setArg(4, RayBounceCount);
+			kernel.setArg(5, ImageSamples);
+			kernel.setArg(6, clOutput);
+
+			SetGlobalWorkSize(ImageWidth * ImageHeight);
+
+			ConsoleOutput << "Rendering started...\n";
+
+			auto startTime = high_resolution_clock::now();
+
+			context->queue.enqueueNDRangeKernel(kernel, 0, GetGlobalWorkSize(), GetLocalWorkSize());
+
+			if (context->queue.finish() != CL_SUCCESS) {
+				throw new exception("Image rendering failed !");
+			}
+
+			auto endTime = high_resolution_clock::now();
+			auto renderTime = duration_cast<milliseconds>(endTime - startTime);
+			ConsoleOutput << "Image rendering complete in " << renderTime.count() << "ms !\nWriting result to disk...\n";
+
+			context->queue.enqueueReadBuffer(clOutput, CL_TRUE, 0, ImageWidth * ImageHeight * sizeof(cl_float3), SampleOutput);
+
+			SaveImage();
+
+			delete SampleOutput;
 		}
 	};
 }

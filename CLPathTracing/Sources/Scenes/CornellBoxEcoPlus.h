@@ -5,6 +5,7 @@ namespace PathTracer::Scenes
 {
 	class CornellBoxEcoPlus : public Scene
 	{
+	public:
 		CornellBoxEcoPlus() : Scene()
 		{
 			sphereObjects =
@@ -29,7 +30,7 @@ namespace PathTracer::Scenes
 				Sphere(0.16f, float3(0.25f, -0.24f, -0.1f), float3(0.9f, 0.8f, 0.7f)),
 
 				//Light source (Sphere light)
-				Sphere(1.0f, float3(0.0f, 1.36f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(10.0f, 10.0f, 10.0f))
+				Sphere(1.0f, float3(0.0f, 1.36f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(4.0f, 4.0f, 4.0f))
 			};
 		}
 	};

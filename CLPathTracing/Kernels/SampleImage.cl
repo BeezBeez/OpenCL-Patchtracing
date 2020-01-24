@@ -10,7 +10,7 @@ struct Sphere {
     float3 emission;
 };
 
-struct Ray createCameraRay(const int x, const int y, const int width, const int height)
+Ray createCameraRay(const int x, const int y, const int width, const int height)
 {
     //Convert int to float in a normalized range [0..1]
     float nX = (float)x / (float)width;

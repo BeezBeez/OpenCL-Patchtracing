@@ -30,6 +30,11 @@ int main()
 
 	//WaitForEnter();
 
-	Programs::SampleImage SampleImageProgram = Programs::SampleImage(&context, "UVGradient");
-	SampleImageProgram.Run(false);
+	//Programs::SampleImage SampleImageProgram = Programs::SampleImage(&context, "UVGradient");
+	//SampleImageProgram.Run(false);
+
+	Programs::SceneImage SceneImageProgram = Programs::SceneImage(&context, new Scenes::CornellBoxEcoPlus(), "CornellBoxEcoPlus-Test", 5, 4096);
+	SceneImageProgram.Run();
+
+	WaitForEnter();
 }

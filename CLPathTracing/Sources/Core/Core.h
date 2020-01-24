@@ -34,3 +34,4 @@ using namespace cl;
 
 #define Delay(x) sleep_for(milliseconds(x))
 #define WaitForEnter() ConsoleOutput << "Press [ENTER] to continue..."; do {} while (getchar() != '\n')
+#define ARRAY_SIZE(arr) *(&arr + 1) - arr
