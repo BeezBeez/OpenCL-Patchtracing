@@ -10,16 +10,17 @@ namespace PathTracer::Programs
 		unsigned int ImageWidth, ImageHeight, ImageSamples, RayBounceCount;
 		cl_float4* SampleOutput;
 		Scenes::Sphere* cpuSpheres;
-		std::size_t spheresCount;
 		string ImageName;
 		GLuint vertexBuffer;
 
-		Buffer clSceneSpheres;
 		BufferGL clVertexBuffer;
 		vector<Memory> clVertexBuffers;
 
 	public:
 		unsigned int frameNumber = 0;
+		Buffer clSceneSpheres;
+		Scenes::Scene* scenePtr;
+		std::size_t spheresCount;
 
 	private:
 		inline float clamp(float x) { return x < .0f ? .0f : x > 1.f ? 1.f : x; } //Clamp a float value between 0 and 1
@@ -53,10 +54,11 @@ namespace PathTracer::Programs
 			this->ImageName = ImageName;
 			this->SampleOutput = new cl_float3[width * height];
 			this->vertexBuffer = vbo;
+			this->scenePtr = scene;
 
-			spheresCount = scene->GetSpheresCount();
+			spheresCount = scenePtr->GetSpheresCount();
 			cpuSpheres = new Scenes::Sphere[spheresCount];
-			cpuSpheres = scene->GetObjects();
+			cpuSpheres = scenePtr->GetObjects();
 		}
 
 		unsigned int GetImageWidth() { return ImageWidth; }

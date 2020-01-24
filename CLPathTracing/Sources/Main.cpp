@@ -12,8 +12,11 @@ void RenderFrame()
 {
 	SceneImageProgram->frameNumber++;
 
+	SceneImageProgram->scenePtr->Update(SceneImageProgram->frameNumber);
+	SceneImageProgram->context->queue.enqueueWriteBuffer(SceneImageProgram->clSceneSpheres, CL_TRUE, 0, SceneImageProgram->spheresCount * sizeof(Scenes::Sphere), SceneImageProgram->scenePtr->GetObjects());
 	auto start = high_resolution_clock::now();
 
+	SceneImageProgram->kernel.setArg(0, SceneImageProgram->clSceneSpheres);
 	SceneImageProgram->kernel.setArg(7, SceneImageProgram->WangHash(SceneImageProgram->frameNumber));
 	SceneImageProgram->RunKernel();
 
@@ -30,7 +33,7 @@ void RenderFrame()
 int main(int argc, char** argv)
 {
 	//Initialize OpenGL
-	glRenderer = new GLRenderer(640, 360);
+	glRenderer = new GLRenderer(960, 540);
 	glRenderer->InitRenderer(argc, argv);
 
 	//Initialize OpenCL
@@ -44,7 +47,7 @@ int main(int argc, char** argv)
 
 	glRenderer->SetRenderCallback(RenderFrame);
 
-	SceneImageProgram = new Programs::SceneImage(&context, glRenderer->VertexBuffer, new Scenes::CornellBoxEcoPlus(), 4, 128, glRenderer->ViewportWidth, glRenderer->ViewportHeight);
+	SceneImageProgram = new Programs::SceneImage(&context, glRenderer->VertexBuffer, new Scenes::CornellBoxEcoPlus(), 3, 32, glRenderer->ViewportWidth, glRenderer->ViewportHeight);
 	SceneImageProgram->Run();
 
 	glutMainLoop();

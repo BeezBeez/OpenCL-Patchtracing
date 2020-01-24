@@ -30,8 +30,14 @@ namespace PathTracer::Scenes
 				Sphere(0.16f, float3(0.25f, -0.24f, -0.1f), float3(0.9f, 0.8f, 0.7f)),
 
 				//Light source (Sphere light)
-				Sphere(1.0f, float3(0.0f, 1.36f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(4.0f, 4.0f, 4.0f))
+				Sphere(1.05f, float3(0.0f, 1.39f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(3.0f, 3.0f, 3.0f))
 			};
+		}
+
+		virtual void Update(int frameNumber) override
+		{
+			sphereObjects[5].Position.s[1] = (cosf(frameNumber * 0.3) * 0.15) - 0.24f;
+			sphereObjects[6].Position.s[1] = (cosf(frameNumber * 0.3) * -0.15) - 0.24f;
 		}
 	};
 }
