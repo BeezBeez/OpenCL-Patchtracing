@@ -1,40 +1,51 @@
 #include "Core/Application.h"
 
-int main()
+Programs::SceneImage* SceneImageProgram;
+GLRenderer* glRenderer;
+
+void Update(int value) {
+	glutPostRedisplay();
+	glutTimerFunc(15, Update, 0);
+}
+
+void RenderFrame()
 {
-	CLRenderer Renderer = CLRenderer();
+	SceneImageProgram->frameNumber++;
 
-	Renderer.SelectPlatform();
-	ConsoleOutput << "\nUsing OpenCL Platform : " << Renderer.RendererPlatform.getInfo<CL_PLATFORM_NAME>() << endl << endl;
+	auto start = high_resolution_clock::now();
 
-	Renderer.SelectDevice();
-	ConsoleOutput << "\nUsing OpenCL Device: " << Renderer.RendererDevice.getInfo<CL_DEVICE_NAME>() << endl << endl;
-	Renderer.PrintDeviceInfo();
+	SceneImageProgram->kernel.setArg(7, SceneImageProgram->WangHash(SceneImageProgram->frameNumber));
+	SceneImageProgram->RunKernel();
 
-	CLContext context = CLContext(&Renderer);
+	glRenderer->Draw();
 
-	WaitForEnter();
+	auto end = high_resolution_clock::now();
+	auto renderTime = duration_cast<milliseconds>(end - start);
+	auto title = "OpenCL Viewport - Sphere Path tracer [" + to_string(renderTime.count()) + " ms / " + toStringWithPrecision(1.0f / (renderTime.count() / 1000.0f), 1) + " FPS]";
+	if (SceneImageProgram->frameNumber % 5 == 0) {
+		glutSetWindowTitle(title.c_str());
+	}
+}
 
-	//const int numElements = 10;
-	//Programs::ParallelAdd ParallelAddProgram = Programs::ParallelAdd(&context, numElements);
+int main(int argc, char** argv)
+{
+	//Initialize OpenGL
+	glRenderer = new GLRenderer(640, 360);
+	glRenderer->InitRenderer(argc, argv);
 
-	//float cpuArrayA[numElements] = { 0.0f, 1.0f, 2.0f, 8.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f };
-	//float cpuArrayB[numElements] = { 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f };
-	//float* cpuOutput = ParallelAddProgram.Run(cpuArrayA, cpuArrayB);
+	//Initialize OpenCL
+	CLRenderer clRenderer = CLRenderer();
+	CLContext context = CLContext(&clRenderer);
 
-	////Print results to console
-	//ConsoleOutput << "\nRESULTS :\n";
-	//for (int i = 0; i < numElements; i++) {
-	//	ConsoleOutput << cpuArrayA[i] << " + " << cpuArrayB[i] << " = " << cpuOutput[i] << endl;
-	//}
+	glRenderer->GenerateVertexBuffer(&glRenderer->VertexBuffer);
+	Update(0);
 
-	//WaitForEnter();
+	glFinish(); //Make sure OpenGL is finished before we proceed
 
-	//Programs::SampleImage SampleImageProgram = Programs::SampleImage(&context, "UVGradient");
-	//SampleImageProgram.Run(false);
+	glRenderer->SetRenderCallback(RenderFrame);
 
-	Programs::SceneImage SceneImageProgram = Programs::SceneImage(&context, new Scenes::CornellBoxEcoPlus(), "CornellBoxEcoPlus-Test", 5, 4096);
-	SceneImageProgram.Run();
+	SceneImageProgram = new Programs::SceneImage(&context, glRenderer->VertexBuffer, new Scenes::CornellBoxEcoPlus(), 4, 128, glRenderer->ViewportWidth, glRenderer->ViewportHeight);
+	SceneImageProgram->Run();
 
-	WaitForEnter();
+	glutMainLoop();
 }

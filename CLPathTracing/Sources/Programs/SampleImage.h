@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/Core.h"
-#include "Renderer/CLProgram.h"
+#include "Renderer/OpenCL/CLProgram.h"
 
 namespace PathTracer::Programs
 {

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Core.h"
-#include "Renderer/CLRenderer.h"
-#include "Renderer/CLContext.h"
-#include "Renderer/CLProgram.h"
+#include "Renderer/OpenCL/CLRenderer.h"
+#include "Renderer/OpenCL/CLContext.h"
+#include "Renderer/OpenCL/CLProgram.h"
+
+#include "Renderer/OpenGL/GLRenderer.h"
 
 #include "Programs/ParallelAdd.h"
 #include "Programs/SampleImage.h"

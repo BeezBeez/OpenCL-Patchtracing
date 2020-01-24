@@ -1,6 +1,6 @@
 #pragma once
 #include "Scenes/Scene.h"
-#include "Renderer/CLProgram.h"
+#include "Renderer/OpenCL/CLProgram.h"
 
 namespace PathTracer::Programs
 {
@@ -12,6 +12,14 @@ namespace PathTracer::Programs
 		Scenes::Sphere* cpuSpheres;
 		std::size_t spheresCount;
 		string ImageName;
+		GLuint vertexBuffer;
+
+		Buffer clSceneSpheres;
+		BufferGL clVertexBuffer;
+		vector<Memory> clVertexBuffers;
+
+	public:
+		unsigned int frameNumber = 0;
 
 	private:
 		inline float clamp(float x) { return x < .0f ? .0f : x > 1.f ? 1.f : x; } //Clamp a float value between 0 and 1
@@ -36,7 +44,7 @@ namespace PathTracer::Programs
 			resultImage.close();
 		}
 	public:
-		SceneImage(CLContext* context, Scenes::Scene* scene, string ImageName, unsigned int bounceCount = 2U, unsigned int samples = 32U, unsigned int width = 1280, unsigned int height = 720) : CLProgram(context, string("SceneImage"))
+		SceneImage(CLContext* context, GLuint vbo, Scenes::Scene* scene, unsigned int bounceCount = 2U, unsigned int samples = 32U, unsigned int width = 1280, unsigned int height = 720) : CLProgram(context, string("SceneImage"))
 		{
 			this->ImageWidth = width;
 			this->ImageHeight = height;
@@ -44,18 +52,38 @@ namespace PathTracer::Programs
 			this->RayBounceCount = bounceCount;
 			this->ImageName = ImageName;
 			this->SampleOutput = new cl_float3[width * height];
+			this->vertexBuffer = vbo;
 
 			spheresCount = scene->GetSpheresCount();
 			cpuSpheres = new Scenes::Sphere[spheresCount];
 			cpuSpheres = scene->GetObjects();
 		}
 
+		unsigned int GetImageWidth() { return ImageWidth; }
+		unsigned int GetImageHeight() { return ImageHeight; }
+
+		//Hash function to calculate new seed for each frame
+		unsigned int WangHash(unsigned int seed)
+		{
+			seed = (seed ^ 61) ^ (seed >> 16);
+			seed *= 9;
+			seed = seed ^ (seed >> 4);
+			seed *= 0x27d4eb2d;
+			seed = seed ^ (seed >> 15);
+			return seed;
+		}
+
 		void Run()
 		{
 			ConsoleOutput << "Sending " << spheresCount << " spheres to GPU...\n";
-			Buffer clOutput = Buffer(context->context, CL_MEM_WRITE_ONLY, ImageWidth * ImageHeight * sizeof(cl_float3));
-			Buffer clSceneSpheres = Buffer(context->context, CL_MEM_READ_ONLY, spheresCount * sizeof(Scenes::Sphere));
+			//Buffer clOutput = Buffer(context->context, CL_MEM_WRITE_ONLY, ImageWidth * ImageHeight * sizeof(cl_float3));
+
+			clSceneSpheres = Buffer(context->context, CL_MEM_READ_ONLY, spheresCount * sizeof(Scenes::Sphere));
 			context->queue.enqueueWriteBuffer(clSceneSpheres, CL_TRUE, 0, spheresCount * sizeof(Scenes::Sphere), cpuSpheres);
+
+			clVertexBuffer = BufferGL(context->context, CL_MEM_WRITE_ONLY, this->vertexBuffer);
+
+			clVertexBuffers.push_back(clVertexBuffer);
 
 			kernel.setArg(0, clSceneSpheres);
 			kernel.setArg(1, ImageWidth);
@@ -63,29 +91,26 @@ namespace PathTracer::Programs
 			kernel.setArg(3, (int)spheresCount);
 			kernel.setArg(4, RayBounceCount);
 			kernel.setArg(5, ImageSamples);
-			kernel.setArg(6, clOutput);
+			kernel.setArg(6, clVertexBuffer);
+			kernel.setArg(7, frameNumber);
+		}
 
+		void RunKernel()
+		{
 			SetGlobalWorkSize(ImageWidth * ImageHeight);
+			glFinish();
 
-			ConsoleOutput << "Rendering started...\n";
+			//Passes all the Vexter Buffer Objects
+			context->queue.enqueueAcquireGLObjects(&clVertexBuffers);
+			context->queue.finish();
 
-			auto startTime = high_resolution_clock::now();
-
+			//Start the kernel
 			context->queue.enqueueNDRangeKernel(kernel, 0, GetGlobalWorkSize(), GetLocalWorkSize());
+			context->queue.finish();
 
-			if (context->queue.finish() != CL_SUCCESS) {
-				throw new exception("Image rendering failed !");
-			}
-
-			auto endTime = high_resolution_clock::now();
-			auto renderTime = duration_cast<milliseconds>(endTime - startTime);
-			ConsoleOutput << "Image rendering complete in " << renderTime.count() << "ms !\nWriting result to disk...\n";
-
-			context->queue.enqueueReadBuffer(clOutput, CL_TRUE, 0, ImageWidth * ImageHeight * sizeof(cl_float3), SampleOutput);
-
-			SaveImage();
-
-			delete SampleOutput;
+			//Release the vertex buffer objects to let OpenGL manipulate them
+			context->queue.enqueueReleaseGLObjects(&clVertexBuffers);
+			context->queue.finish();
 		}
 	};
 }

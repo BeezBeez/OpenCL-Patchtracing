@@ -16,9 +16,16 @@
 #include <thread>
 #include <math.h>
 
-/* OpenCL C++ Bindings */
+
+/** OpenGL Libraries **/
+#include <GL/glew.h>	   /* OpenGL Extension Loader */
+#include <GL/glut.h>       /* OpenGL Utility Toolkit */
+
+
+/** OpenCL Libraries */
 #define __CL_ENABLE_EXCEPTIONS
-#include "OpenCL/cl.hpp"
+#include "OpenCL/cl.hpp" /* OpenCL C++ Bindings */
+
 
 using namespace std;
 using namespace std::this_thread;
@@ -26,11 +33,19 @@ using namespace std::chrono;
 
 using namespace cl;
 
+template <typename T>
+std::string toStringWithPrecision(const T aValue, const int n = 2)
+{
+	std::ostringstream out;
+	out.precision(n);
+	out << std::fixed << aValue;
+	return out.str();
+}
+
 /* Custom macros */
 #define ConsoleOutput std::cout
 #define ConsoleInput std::cin
 #define ConsoleError std::cerr
-
 
 #define Delay(x) sleep_for(milliseconds(x))
 #define WaitForEnter() ConsoleOutput << "Press [ENTER] to continue..."; do {} while (getchar() != '\n')

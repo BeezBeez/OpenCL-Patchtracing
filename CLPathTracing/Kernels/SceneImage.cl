@@ -129,13 +129,15 @@ float3 pathTrace(__constant Sphere* spheres, const Ray* cameraRay, const int bou
     return accumulatedColor;
 }
 
-__kernel void main(__constant Sphere* spheres, const int width, const int height, const int sphereCount, const int bounceCount, const int sampleCount, __global float3* output) {
+union Color{ float c; uchar4 components; };
+
+__kernel void main(__constant Sphere* spheres, const int width, const int height, const int sphereCount, const int bounceCount, const int sampleCount, __global float3* output, const int hxFrameNumber) {
     unsigned int workItemId = get_global_id(0);
     unsigned int x_coord = workItemId % width;
     unsigned int y_coord = workItemId / width;
 
-    unsigned int seed0 = x_coord;
-    unsigned int seed1 = y_coord;
+    unsigned int seed0 = x_coord + hxFrameNumber;
+    unsigned int seed1 = y_coord + hxFrameNumber;
 
     Ray primaryRay = createCameraRay(x_coord, y_coord, width, height);
 
@@ -146,5 +148,14 @@ __kernel void main(__constant Sphere* spheres, const int width, const int height
         finalColor += pathTrace(spheres, &primaryRay, bounceCount, sphereCount, &seed0, &seed1, width) * inversedSamples;
     }
 
-    output[workItemId] = finalColor;
+    finalColor = (float3)(clamp(finalColor.x, 0.0f, 1.0f), clamp(finalColor.y, 0.0f, 1.0f), clamp(finalColor.z, 0.0f, 1.0f));
+
+    union Color fColor;
+    fColor.components = (uchar4)(
+        (unsigned char)(finalColor.x * 255),
+        (unsigned char)(finalColor.y * 255),
+        (unsigned char)(finalColor.z * 255),
+    1);
+    
+    output[workItemId] = (float3)(x_coord, y_coord, fColor.c);
 }

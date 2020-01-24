@@ -8,10 +8,20 @@ namespace PathTracer
 	public:
 		Platform RendererPlatform;
 		Device RendererDevice;
-
+		
 	public:
 		CLRenderer() {}
 		~CLRenderer() {}
+
+		void InitRenderer()
+		{
+			this->SelectPlatform();
+			ConsoleOutput << "\nUsing OpenCL Platform : " << this->RendererPlatform.getInfo<CL_PLATFORM_NAME>() << endl << endl;
+
+			this->SelectDevice();
+			ConsoleOutput << "\nUsing OpenCL Device: " << this->RendererDevice.getInfo<CL_DEVICE_NAME>() << endl << endl;
+			this->PrintDeviceInfo();
+		}
 
 		void SelectPlatform()
 		{
