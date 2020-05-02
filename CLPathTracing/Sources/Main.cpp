@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 
 	glRenderer->SetRenderCallback(RenderFrame);
 
-	SceneImageProgram = new Programs::SceneImage(&context, glRenderer->VertexBuffer, new Scenes::CornellBoxEcoPlus(), 3, 32, glRenderer->ViewportWidth, glRenderer->ViewportHeight);
+	SceneImageProgram = new Programs::SceneImage(&context, glRenderer->VertexBuffer, new Scenes::CornellBoxEcoPlus(), 4, 72, glRenderer->ViewportWidth, glRenderer->ViewportHeight);
 	SceneImageProgram->Run();
 
 	glutMainLoop();
