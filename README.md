@@ -1,5 +1,5 @@
 # OpenCL-Pathtracer
-OpenCL sandbox path tracer
+OpenCL sandbox realtime path tracer
 
 Features :
 
