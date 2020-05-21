@@ -24,10 +24,11 @@ namespace PathTracer
 		void InitRenderer(int argc, char** argv)
 		{
 			glutInit(&argc, argv); //Initialize GLUT for OpenGL Viewport	
-			glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); //Use RGB display mode with Double-Buffering
+			glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_HIDDEN); //Use RGB display mode with Double-Buffering
 
-			glutInitWindowPosition(80, 80); //Define initial window position on screen
+			glutInitWindowPosition(500, 300); //Define initial window position on screen
 			glutInitWindowSize(ViewportWidth, ViewportHeight);
+			
 			glutCreateWindow("OpenCL Viewport - Sphere Path tracer");
 
 			//Load OpenGL Extensions
@@ -51,10 +52,12 @@ namespace PathTracer
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
-		void Draw()
+		void Draw(bool clearColorBuffer = true)
 		{
-			//Clear all pixels then render from the vertex buffer object
-			glClear(GL_COLOR_BUFFER_BIT);
+			if (!clearColorBuffer) {
+				//Clear all pixels then render from the vertex buffer object
+				glClear(GL_COLOR_BUFFER_BIT);
+			}
 			glBindBuffer(GL_ARRAY_BUFFER, VertexBuffer);
 			glVertexPointer(2, GL_FLOAT, 16, 0);
 			glColorPointer(4, GL_UNSIGNED_BYTE, 16, (GLvoid*)8);
@@ -68,7 +71,5 @@ namespace PathTracer
 
 			glutSwapBuffers(); //Flip BackBuffer to Screen
 		}
-
-
 	};
 }
